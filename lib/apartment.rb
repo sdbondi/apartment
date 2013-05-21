@@ -8,7 +8,7 @@ module Apartment
 
     extend Forwardable
 
-    ACCESSOR_METHODS  = [:use_schemas, :seed_after_create, :prepend_environment, :append_environment]
+    ACCESSOR_METHODS  = [:use_schemas, :seed_after_create, :prepend_environment, :append_environment, :exclude_request_regex]
     WRITER_METHODS    = [:database_names, :database_schema_file, :excluded_models, :default_schema, :persistent_schemas, :connection_class]
 
     attr_accessor(*ACCESSOR_METHODS)

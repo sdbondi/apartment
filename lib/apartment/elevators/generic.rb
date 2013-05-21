@@ -12,9 +12,12 @@ module Apartment
       def call(env)
         request = Rack::Request.new(env)
 
-        database = @processor.call(request)
+        # Exclude some requests from schema switching e.g. assets
+        unless Apartment.exclude_request_regex && request.path =~ Apartment.exclude_request_regex
+          database = @processor.call(request)
 
-        Apartment::Database.switch database if database
+          Apartment::Database.switch database if database
+        end
 
         @app.call(env)
       end

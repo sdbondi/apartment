@@ -1,5 +1,19 @@
 apartment_namespace = namespace :apartment do
 
+  def task_with_database(task, database = nil)
+    database ||= Apartment.default_schema
+
+    Apartment.process database do
+      Rake::Task[task].invoke
+    end
+  end
+
+  desc "Dump a database using the 'db' environment variable (or default_schema in config)"
+  task 'schema:dump' => :environment do
+    ENV['db'] ||= Apartment.default_schema
+    task_with_database 'db:schema:dump', ENV['db']
+  end
+
   desc "Migrate all multi-tenant databases"
   task :migrate => :environment do
 
@@ -7,6 +21,8 @@ apartment_namespace = namespace :apartment do
       puts("Migrating #{db} database")
       Apartment::Migrator.migrate db
     end
+
+    task_with_database 'db:migrate'
   end
 
   desc "Seed all multi-tenant databases"
@@ -18,6 +34,8 @@ apartment_namespace = namespace :apartment do
         Apartment::Database.seed
       end
     end
+
+    task_with_database 'db:seed'
   end
 
   desc "Rolls the schema back to the previous version (specify steps w/ STEP=n) across all multi-tenant dbs."
@@ -28,6 +46,8 @@ apartment_namespace = namespace :apartment do
       puts("Rolling back #{db} database")
       Apartment::Migrator.rollback db, step
     end
+    
+    task_with_database 'db:rollback'
   end
 
   namespace :migrate do
@@ -41,6 +61,8 @@ apartment_namespace = namespace :apartment do
         puts("Migrating #{db} database up")
         Apartment::Migrator.run :up, db, version
       end
+      
+      task_with_database 'db:migrate:up'
     end
 
     desc 'Runs the "down" for a given migration VERSION across all multi-tenant dbs.'
@@ -52,7 +74,9 @@ apartment_namespace = namespace :apartment do
         puts("Migrating #{db} database down")
         Apartment::Migrator.run :down, db, version
       end
-    end
+    
+      task_with_database 'db:migrate:down'
+    end    
 
     desc  'Rollbacks the database one migration and re migrate up (options: STEP=x, VERSION=x).'
     task :redo => :environment do

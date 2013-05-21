@@ -11,7 +11,7 @@ module Apartment
         database.present? && database || nil
       end
 
-    private
+    protected
 
       # *Almost* a direct ripoff of ActionDispatch::Request subdomain methods
 

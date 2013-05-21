@@ -1,7 +1,7 @@
 apartment_namespace = namespace :apartment do
 
   desc "Migrate all multi-tenant databases"
-  task :migrate => 'db:migrate' do
+  task :migrate => :environment do
 
     Apartment.database_names.each do |db|
       puts("Migrating #{db} database")
@@ -10,7 +10,7 @@ apartment_namespace = namespace :apartment do
   end
 
   desc "Seed all multi-tenant databases"
-  task :seed => 'db:seed' do
+  task :seed => :environment do
 
     Apartment.database_names.each do |db|
       puts("Seeding #{db} database")
@@ -21,7 +21,7 @@ apartment_namespace = namespace :apartment do
   end
 
   desc "Rolls the schema back to the previous version (specify steps w/ STEP=n) across all multi-tenant dbs."
-  task :rollback => 'db:rollback' do
+  task :rollback => :environment do
     step = ENV['STEP'] ? ENV['STEP'].to_i : 1
 
     Apartment.database_names.each do |db|
@@ -33,7 +33,7 @@ apartment_namespace = namespace :apartment do
   namespace :migrate do
 
     desc 'Runs the "up" for a given migration VERSION across all multi-tenant dbs.'
-    task :up => 'db:migrate:up' do
+    task :up => :environment do
       version = ENV['VERSION'] ? ENV['VERSION'].to_i : nil
       raise 'VERSION is required' unless version
 
@@ -44,7 +44,7 @@ apartment_namespace = namespace :apartment do
     end
 
     desc 'Runs the "down" for a given migration VERSION across all multi-tenant dbs.'
-    task :down => 'db:migrate:down' do
+    task :down => :environment do
       version = ENV['VERSION'] ? ENV['VERSION'].to_i : nil
       raise 'VERSION is required' unless version
 
@@ -55,7 +55,7 @@ apartment_namespace = namespace :apartment do
     end
 
     desc  'Rollbacks the database one migration and re migrate up (options: STEP=x, VERSION=x).'
-    task :redo => 'db:migrate:redo' do
+    task :redo => :environment do
       if ENV['VERSION']
         apartment_namespace['migrate:down'].invoke
         apartment_namespace['migrate:up'].invoke

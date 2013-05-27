@@ -113,6 +113,17 @@ describe "apartment rake tasks" do
       end
     end
 
+    describe "apartment:schema:dump" do
+      it "should dump default schema" do
+        Apartment.default_schema ||= 'public'
+
+        io = StringIO.new
+        Apartment::Migrator.dump(Apartment.default_schema, io)
+
+        io.string.should_not eq ''
+      end
+    end
+
   end
 
 end

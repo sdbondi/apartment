@@ -1,13 +1,5 @@
 apartment_namespace = namespace :apartment do
 
-  def task_with_database(task, database = nil)
-    database ||= Apartment.default_schema
-
-    Apartment.process database do
-      Rake::Task[task].invoke
-    end
-  end
-
   def database_names
     @db_names ||= ([Apartment.default_schema] + Apartment.database_names).uniq
   end
@@ -16,7 +8,6 @@ apartment_namespace = namespace :apartment do
   task 'schema:dump' => :environment do
     ENV['db'] ||= Apartment.default_schema
     Apartment::Migrator.dump ENV['db']
-    task_with_database 'db:schema:dump', ENV['db']
   end
 
   desc "Migrate all multi-tenant databases"

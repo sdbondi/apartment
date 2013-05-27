@@ -13,6 +13,19 @@ module Apartment
       end
     end
 
+    # Dump schema.rb from specified database
+    def dump(database, stream = nil)
+      stream ||= File.new("db/schema.rb", "w+")
+       Database.process(database) do
+        ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, stream)
+      end
+    ensure
+      begin
+        stream.close if stream.respond_to?(:close)
+      rescue
+      end
+    end
+
     # Migrate up/down to a specific version
     def run(direction, database, version)
       Database.process(database){ ActiveRecord::Migrator.run(direction, ActiveRecord::Migrator.migrations_path, version) }

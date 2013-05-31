@@ -16,7 +16,11 @@ module Apartment
         unless Apartment.exclude_request_regex && request.path =~ Apartment.exclude_request_regex
           database = @processor.call(request)
 
-          Apartment::Database.switch database if database
+          if database
+            Apartment::Database.switch database 
+          else
+            return handle_not_found(env)
+          end
         end
 
         @app.call(env)
@@ -24,6 +28,11 @@ module Apartment
 
       def parse_database_name(request)
         raise "Override"
+      end
+
+      def handle_not_found(env)
+        # Just continue
+        @app.call(env)
       end
     end
   end
